@@ -173,6 +173,11 @@ body {
   position: fixed;
   z-index: 40;
   margin: 0;
+  /* Without this the button is a shrink-to-fit box, so when it sits near the
+     right edge the browser squeezes it to whatever space is left and it
+     measures narrower than it really is — which broke the clamp that keeps it
+     on screen. nowrap makes its width constant wherever it lands. */
+  white-space: nowrap;
   transition: left .22s cubic-bezier(.2,.9,.3,1.2), top .22s cubic-bezier(.2,.9,.3,1.2), transform .16s ease;
 }
 

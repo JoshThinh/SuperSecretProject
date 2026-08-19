@@ -64,46 +64,91 @@ const askSubtitle = document.getElementById('askSubtitle');
 let dodges = 0;
 let yesScale = 1;
 
-function dodge() {
-  const pad = 16;
+const PAD = 12;          // smallest gap we'll leave between button and edge
+const MAX_TILT = 15;     // degrees either side of upright
+let tilt = 0;
+
+/* The live viewport. documentElement.clientWidth excludes the scrollbar,
+   which innerWidth does not — otherwise the button can land underneath it. */
+function viewport() {
+  const el = document.documentElement;
+  return {
+    w: el.clientWidth || window.innerWidth,
+    h: el.clientHeight || window.innerHeight,
+  };
+}
+
+/* Rotating the button makes the box it actually paints bigger than its layout
+   box, and the extra sticks out evenly on each side. Work out that overhang so
+   a tilted button doesn't clip the edge. */
+function overhang(w, h, deg) {
+  const rad = Math.abs(deg) * Math.PI / 180;
+  const bw = w * Math.cos(rad) + h * Math.sin(rad);
+  const bh = w * Math.sin(rad) + h * Math.cos(rad);
+  return { x: (bw - w) / 2, y: (bh - h) / 2 };
+}
+
+/* Clamp a position so the whole button — tilt included — stays on screen.
+   If it somehow can't fit, centre it rather than letting it hang off. */
+function clampToViewport(x, y) {
+  const { w: vw, h: vh } = viewport();
   const w = noBtn.offsetWidth;
   const h = noBtn.offsetHeight;
+  const over = overhang(w, h, tilt);
 
+  const minX = PAD + over.x, maxX = vw - w - PAD - over.x;
+  const minY = PAD + over.y, maxY = vh - h - PAD - over.y;
+
+  return {
+    x: maxX > minX ? Math.min(Math.max(x, minX), maxX) : (vw - w) / 2,
+    y: maxY > minY ? Math.min(Math.max(y, minY), maxY) : (vh - h) / 2,
+  };
+}
+
+function dodge() {
   if (!noBtn.classList.contains('is-loose')) {
-    // freeze it in place first so the jump reads as a jump
+    // Freeze it where it stands so the first jump reads as a jump.
     const r = noBtn.getBoundingClientRect();
     noBtn.classList.add('is-loose');
     noBtn.style.left = `${r.left}px`;
     noBtn.style.top = `${r.top}px`;
-    // force a reflow so the transition applies to the next move
-    void noBtn.offsetWidth;
+    // The card sits inside an element that carries a finished CSS animation,
+    // which makes it the containing block for position:fixed — the button
+    // would be placed relative to the card, not the window, and could end up
+    // well past the bottom of the screen. Reparenting to <body> fixes that.
+    document.body.appendChild(noBtn);
+    void noBtn.offsetWidth; // reflow, so the move animates
   }
 
-  const maxX = window.innerWidth - w - pad;
-  const maxY = window.innerHeight - h - pad;
-
-  // keep it away from where it currently is, so it visibly moves
-  const cur = noBtn.getBoundingClientRect();
-  let x, y, tries = 0;
-  do {
-    x = pad + Math.random() * Math.max(0, maxX - pad);
-    y = pad + Math.random() * Math.max(0, maxY - pad);
-    tries++;
-  } while (tries < 12 && Math.hypot(x - cur.left, y - cur.top) < Math.min(220, window.innerWidth * 0.4));
-
-  noBtn.style.left = `${x}px`;
-  noBtn.style.top = `${y}px`;
-  noBtn.style.transform = `rotate(${(Math.random() * 30 - 15).toFixed(1)}deg)`;
-
   dodges++;
+
+  // Relabel BEFORE measuring — a wider label ("No 🙃") measured after the move
+  // would push the button past the right edge on a narrow screen.
+  if (dodges === 5) noBtn.textContent = 'No 🙃';
+  if (dodges === 9) noBtn.textContent = 'nope';
+
+  tilt = Math.random() * MAX_TILT * 2 - MAX_TILT;
+
+  const { w: vw, h: vh } = viewport();
+  const cur = noBtn.getBoundingClientRect();
+  const minJump = Math.min(220, Math.max(vw, vh) * 0.35);
+
+  // Aim somewhere clearly away from where it is now.
+  let pos, tries = 0;
+  do {
+    pos = clampToViewport(Math.random() * vw, Math.random() * vh);
+    tries++;
+  } while (tries < 20 && Math.hypot(pos.x - cur.left, pos.y - cur.top) < minJump);
+
+  noBtn.style.left = `${pos.x}px`;
+  noBtn.style.top = `${pos.y}px`;
+  noBtn.style.transform = `rotate(${tilt.toFixed(1)}deg)`;
+
   askSubtitle.textContent = NO_TAUNTS[Math.min(dodges - 1, NO_TAUNTS.length - 1)];
 
   // Yes gets a little more tempting each time
   yesScale = Math.min(1.6, yesScale + 0.07);
   yesBtn.style.transform = `scale(${yesScale})`;
-
-  if (dodges === 5) noBtn.textContent = 'No 🙃';
-  if (dodges === 9) noBtn.textContent = 'nope';
 }
 
 // She can click it all she likes — it just isn't there anymore afterwards.
@@ -114,12 +159,17 @@ noBtn.addEventListener('click', e => {
   dodge();
 });
 
-window.addEventListener('resize', () => {
+/* Rotating the phone or resizing the window can strand it off-screen. */
+function keepOnScreen() {
   if (!noBtn.classList.contains('is-loose')) return;
-  const r = noBtn.getBoundingClientRect();
-  noBtn.style.left = `${Math.min(r.left, window.innerWidth - r.width - 16)}px`;
-  noBtn.style.top = `${Math.min(r.top, window.innerHeight - r.height - 16)}px`;
-});
+  // Read back the layout position we set, not the painted (rotated) rect.
+  const pos = clampToViewport(parseFloat(noBtn.style.left) || 0, parseFloat(noBtn.style.top) || 0);
+  noBtn.style.left = `${pos.x}px`;
+  noBtn.style.top = `${pos.y}px`;
+}
+window.addEventListener('resize', keepOnScreen);
+window.addEventListener('orientationchange', keepOnScreen);
+window.visualViewport?.addEventListener('resize', keepOnScreen);
 
 yesBtn.addEventListener('click', () => {
   burst(26);
