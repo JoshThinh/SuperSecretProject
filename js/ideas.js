@@ -47,6 +47,13 @@ export const IDEAS = [
     desc: 'Round1 in Brea — arcade games and air hockey, boba after.',
     location: 'Round1 Brea, 1065 Brea Mall, Brea, CA 92821',
   },
+  {
+    id: 'you-pick',
+    emoji: '🎁',
+    name: 'Leave it to me',
+    desc: "Don't feel like deciding? I'll plan it. You just show up.",
+    location: 'Fullerton, CA',
+  },
 ];
 
 // Escalating messages for the No button, in order.
