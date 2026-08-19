@@ -11,9 +11,6 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💗</text></svg>" />
 </head>
 <body>
-  <!-- floating hearts background -->
-  <div class="hearts" id="hearts" aria-hidden="true"></div>
-
   <main class="stage" id="stage">
 
     <!-- ======================= STEP 1: THE QUESTION ======================= -->
@@ -22,7 +19,7 @@
         <div class="bear">🧸</div>
         <p class="eyebrow">hi noelle</p>
         <h1 class="title">Will you go on a date with me?</h1>
-        <p class="subtitle" id="askSubtitle">no pressure... but there's only one right answer 💘</p>
+        <p class="subtitle" id="askSubtitle"></p>
 
         <div class="btn-row" id="askButtons">
           <button class="btn btn--yes" id="yesBtn" type="button">Yes 💕</button>
@@ -38,6 +35,7 @@
         <p class="eyebrow">step 1 of 3</p>
         <h2 class="title title--sm">Pick our day 🗓️</h2>
         <p class="subtitle">Tap a day that works for you. You can always change it later.</p>
+        <p class="avail-note" id="availNote"></p>
 
         <div class="cal">
           <div class="cal__head">
@@ -73,7 +71,7 @@
         <button class="back-btn" data-back type="button">← Back</button>
         <p class="eyebrow">step 2 of 3</p>
         <h2 class="title title--sm">Okay... what are we doing?</h2>
-        <p class="subtitle">All within a few minutes of Fullerton. Pick your favorite 💕</p>
+        <p class="subtitle">Everything here is close to Fullerton. Pick whatever sounds good.</p>
 
         <div class="ideas" id="ideaGrid"></div>
 
@@ -83,7 +81,7 @@
         </div>
 
         <label class="note-label" for="noteInput">Anything you want to tell me? (optional)</label>
-        <textarea id="noteInput" maxlength="300" rows="2" placeholder="e.g. pick me up? / i'm allergic to sand /  ..."></textarea>
+        <textarea id="noteInput" maxlength="300" rows="2" placeholder="e.g. can you pick me up?"></textarea>
 
         <button class="btn btn--yes btn--wide" id="ideaNext" type="button" disabled>Lock it in →</button>
       </div>

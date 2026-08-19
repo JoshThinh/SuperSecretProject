@@ -4,6 +4,7 @@
 
 import { IDEAS, NO_TAUNTS } from './ideas.js';
 import { saveResponse, isFirebaseConfigured } from './store.js';
+import { isAvailable, earliestTimeFor, noteFor, AVAILABILITY_NOTE } from './availability.js';
 import { fmtLongDate, fmtTime, gcalLink, buildMiniCalendar } from './util.js';
 
 /* ------------------------------------------------------------
@@ -20,23 +21,6 @@ const state = {
 
 const SCREENS = ['screen-ask', 'screen-day', 'screen-idea', 'screen-confirm', 'screen-yay'];
 let historyStack = ['screen-ask'];
-
-/* ------------------------------------------------------------
-   Floating hearts background
-   ------------------------------------------------------------ */
-(function initHearts() {
-  const box = document.getElementById('hearts');
-  const glyphs = ['💗', '💕', '💖', '🩷', '❤️', '💞', '🌸'];
-  for (let i = 0; i < 26; i++) {
-    const s = document.createElement('span');
-    s.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
-    s.style.left = `${Math.random() * 100}%`;
-    s.style.fontSize = `${14 + Math.random() * 22}px`;
-    s.style.animationDuration = `${11 + Math.random() * 14}s`;
-    s.style.animationDelay = `${-Math.random() * 20}s`;
-    box.appendChild(s);
-  }
-})();
 
 /* ------------------------------------------------------------
    Navigation
@@ -112,7 +96,7 @@ function dodge() {
   noBtn.style.transform = `rotate(${(Math.random() * 30 - 15).toFixed(1)}deg)`;
 
   dodges++;
-  askSubtitle.textContent = NO_TAUNTS[Math.min(dodges, NO_TAUNTS.length - 1)];
+  askSubtitle.textContent = NO_TAUNTS[Math.min(dodges - 1, NO_TAUNTS.length - 1)];
 
   // Yes gets a little more tempting each time
   yesScale = Math.min(1.6, yesScale + 0.07);
@@ -183,15 +167,21 @@ function renderCalendar() {
 
     const cellDate = new Date(viewYear, viewMonth, d);
     const key = ymd(viewYear, viewMonth, d);
+    const bookable = cellDate >= today && isAvailable(key);
 
-    if (cellDate < today) btn.disabled = true;
+    if (!bookable) {
+      btn.disabled = true;
+      if (cellDate >= today) btn.title = "I've got class that day";
+    }
     if (cellDate.getTime() === today.getTime()) btn.classList.add('is-today');
     if (state.date === key) btn.classList.add('is-selected');
 
     btn.addEventListener('click', () => {
       state.date = key;
       renderCalendar();
-      pickedLabel.textContent = `${fmtLongDate(key)} 💗`;
+      applyTimeLimits(key);
+      pickedLabel.innerHTML = `${fmtLongDate(key)} 💗`
+        + (noteFor(key) ? `<br><span class="picked__why">${noteFor(key)}</span>` : '');
       dayNext.disabled = false;
     });
 
@@ -211,6 +201,20 @@ nextMonthBtn.addEventListener('click', () => {
   renderCalendar();
 });
 
+/* Hide any times earlier than she's allowed to book on the chosen day. */
+function applyTimeLimits(key) {
+  const min = earliestTimeFor(key);
+  let firstOk = null;
+  [...timePick.options].forEach(o => {
+    const ok = o.value >= min;
+    o.disabled = !ok;
+    o.hidden = !ok;
+    if (ok && !firstOk) firstOk = o.value;
+  });
+  if (timePick.value < min && firstOk) timePick.value = firstOk;
+  state.time = timePick.value;
+}
+
 timePick.addEventListener('change', () => { state.time = timePick.value; });
 
 dayNext.addEventListener('click', () => {
@@ -219,6 +223,7 @@ dayNext.addEventListener('click', () => {
   show('screen-idea');
 });
 
+document.getElementById('availNote').textContent = AVAILABILITY_NOTE;
 renderCalendar();
 
 /* ============================================================

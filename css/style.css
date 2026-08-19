@@ -36,31 +36,6 @@ body {
 }
 
 /* ============================================================
-   Floating hearts background
-   ============================================================ */
-.hearts {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-.hearts span {
-  position: absolute;
-  bottom: -12vh;
-  font-size: 22px;
-  opacity: .55;
-  animation: floatUp linear infinite;
-  filter: drop-shadow(0 3px 6px rgba(201,24,74,.15));
-}
-@keyframes floatUp {
-  0%   { transform: translateY(0) rotate(0deg) scale(.9); opacity: 0; }
-  10%  { opacity: .6; }
-  90%  { opacity: .45; }
-  100% { transform: translateY(-118vh) rotate(360deg) scale(1.15); opacity: 0; }
-}
-
-/* ============================================================
    Stage / screens
    ============================================================ */
 .stage {
@@ -121,6 +96,10 @@ body {
   color: var(--cherry);
 }
 .title--sm { font-size: clamp(24px, 4.2vw, 31px); }
+
+/* starts empty, fills in with taunts once she pokes the No button —
+   reserve the space so the buttons don't jump */
+#askSubtitle { min-height: 1.5em; }
 
 .subtitle {
   margin: 0 0 24px;
@@ -318,6 +297,24 @@ body {
   font-weight: 500;
   color: var(--rose-deep);
   min-height: 21px;
+}
+.picked__why {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.avail-note {
+  margin: -12px 0 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  background: #fff6f9;
+  border: 1px solid #ffdfeb;
+  border-radius: 14px;
+  padding: 10px 14px;
 }
 
 /* ============================================================

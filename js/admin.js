@@ -6,21 +6,6 @@
 import { subscribeResponses, loadResponses, deleteResponse, isFirebaseConfigured } from './store.js';
 import { fmtLongDate, fmtTime, timeAgo, gcalLink, esc } from './util.js';
 
-/* floating hearts (same as the main page, calmer) */
-(function initHearts() {
-  const box = document.getElementById('hearts');
-  const glyphs = ['💗', '💕', '💖', '🌸'];
-  for (let i = 0; i < 14; i++) {
-    const s = document.createElement('span');
-    s.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
-    s.style.left = `${Math.random() * 100}%`;
-    s.style.fontSize = `${14 + Math.random() * 16}px`;
-    s.style.animationDuration = `${16 + Math.random() * 14}s`;
-    s.style.animationDelay = `${-Math.random() * 24}s`;
-    box.appendChild(s);
-  }
-})();
-
 const list = document.getElementById('list');
 const pill = document.getElementById('statusPill');
 const setupNote = document.getElementById('setupNote');

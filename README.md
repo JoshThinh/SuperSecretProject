@@ -14,6 +14,7 @@ noelle-date/
 │   ├── app.js            ← the 5-screen flow
 │   ├── admin.js          ← your dashboard
 │   ├── ideas.js          ← the date ideas (edit these!)
+│   ├── availability.js   ← when you're free (edit this!)
 │   ├── store.js          ← saves to Firestore or localStorage
 │   ├── firebase-config.js← paste your Firebase keys here
 │   └── util.js           ← date formatting + Google Calendar link
@@ -91,8 +92,8 @@ Send her the plain URL. Keep `/admin.html` to yourself.
 | Screen | What happens |
 |---|---|
 | **Ask** | "Will you go on a date with me?" — the **No** button teleports to a random spot on hover, tap, *or* keyboard focus. Yes grows a little each dodge. The subtitle escalates through nine taunts. |
-| **Day** | Month calendar, past days disabled, hearts on the picked day. Plus a time dropdown. |
-| **Idea** | Nine Fullerton-area date ideas, or she can type her own. Optional note to you. |
+| **Day** | Month calendar. Past days and days you're in class are greyed out and unclickable; hearts on the picked day. Time dropdown narrows if that day has a "not before" limit. |
+| **Idea** | Six Fullerton-area date ideas, or she can type her own. Optional note to you. |
 | **Confirm** | A receipt-style summary before anything is saved. |
 | **Yay** | "Yay, it's a date!", confetti, her day hearted on a mini calendar, and an **Add to Google Calendar** button. |
 
@@ -106,7 +107,35 @@ it again. You can delete stray entries from the dashboard.
 
 ---
 
-## 5. Things you'll probably want to change
+## 5. Your availability
+
+`js/availability.js` is the only file to touch when your schedule changes. Days you're not
+free are greyed out on the calendar and can't be clicked, so she can only land on something
+that works.
+
+```js
+export const WEEKLY_FREE = [0, 1, 6];   // 0=Sun 1=Mon … 6=Sat  → Mon/Sat/Sun
+
+export const EXCEPTIONS = {             // one-off days that break the weekly rule
+  '2026-08-20': { earliest: '15:00', why: "I'm out of class at 2 that day…" },
+  '2026-08-21': {},
+  '2026-08-23': {},
+  '2026-08-24': {},
+};
+
+export const EXCEPTIONS_THROUGH = '2026-08-24';
+```
+
+Up to and including `EXCEPTIONS_THROUGH`, **only** the days listed in `EXCEPTIONS` are
+bookable. After that date, `WEEKLY_FREE` takes over. `earliest` hides any time slots before
+it from the dropdown; `why` shows a short line under the calendar when she picks that day.
+
+Once this week is past you can delete the whole `EXCEPTIONS` block and set
+`EXCEPTIONS_THROUGH` to a date in the past — the weekly rule handles everything from there.
+`AVAILABILITY_NOTE` at the bottom of the file is the grey box above the calendar; update it
+if you change the rules.
+
+## 6. Things you'll probably want to change
 
 - **The ideas** → `js/ideas.js`. Each has an emoji, name, description, and a real
   address (the address is what fills in the Google Calendar location).
