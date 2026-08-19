@@ -106,9 +106,13 @@ function dodge() {
   if (dodges === 9) noBtn.textContent = 'nope';
 }
 
-['mouseenter', 'pointerdown', 'touchstart', 'focus', 'click'].forEach(ev =>
-  noBtn.addEventListener(ev, e => { e.preventDefault(); dodge(); }, { passive: false })
-);
+// She can click it all she likes — it just isn't there anymore afterwards.
+// (Only 'click' is wired up, so one tap = exactly one jump. It also covers
+// hitting Enter on it with the keyboard.)
+noBtn.addEventListener('click', e => {
+  e.preventDefault();
+  dodge();
+});
 
 window.addEventListener('resize', () => {
   if (!noBtn.classList.contains('is-loose')) return;

@@ -104,7 +104,7 @@ Send her the plain URL. Keep `/admin.html` to yourself.
 
 | Screen | What happens |
 |---|---|
-| **Ask** | "Will you go on a date with me?" — the **No** button teleports to a random spot on hover, tap, *or* keyboard focus. Yes grows a little each dodge. The subtitle escalates through nine taunts. |
+| **Ask** | "Will you go on a date with me?" — she *can* click **No**, it just teleports to a random spot the instant she does. Yes grows a little each dodge. The subtitle escalates through eight taunts. |
 | **Day** | Month calendar. Past days and days you're in class are greyed out and unclickable; hearts on the picked day. Time dropdown narrows if that day has a "not before" limit. |
 | **Idea** | Six Fullerton-area date ideas, or she can type her own. Optional note to you. |
 | **Confirm** | A receipt-style summary before anything is saved. |
