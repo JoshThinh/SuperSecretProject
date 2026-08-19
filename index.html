@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Question for Noelle 💌</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💗</text></svg>" />
+</head>
+<body>
+  <!-- floating hearts background -->
+  <div class="hearts" id="hearts" aria-hidden="true"></div>
+
+  <main class="stage" id="stage">
+
+    <!-- ======================= STEP 1: THE QUESTION ======================= -->
+    <section class="screen is-active" id="screen-ask" data-step="1">
+      <div class="card card--ask">
+        <div class="bear">🧸</div>
+        <p class="eyebrow">hi noelle</p>
+        <h1 class="title">Will you go on a date with me?</h1>
+        <p class="subtitle" id="askSubtitle">no pressure... but there's only one right answer 💘</p>
+
+        <div class="btn-row" id="askButtons">
+          <button class="btn btn--yes" id="yesBtn" type="button">Yes 💕</button>
+          <button class="btn btn--no" id="noBtn" type="button">No</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= STEP 2: PICK A DAY ======================= -->
+    <section class="screen" id="screen-day" data-step="2">
+      <div class="card">
+        <button class="back-btn" data-back type="button">← Back</button>
+        <p class="eyebrow">step 1 of 3</p>
+        <h2 class="title title--sm">Pick our day 🗓️</h2>
+        <p class="subtitle">Tap a day that works for you. You can always change it later.</p>
+
+        <div class="cal">
+          <div class="cal__head">
+            <button class="cal__nav" id="prevMonth" type="button" aria-label="Previous month">‹</button>
+            <div class="cal__month" id="calMonth">Month</div>
+            <button class="cal__nav" id="nextMonth" type="button" aria-label="Next month">›</button>
+          </div>
+          <div class="cal__dow">
+            <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+          </div>
+          <div class="cal__grid" id="calGrid"></div>
+        </div>
+
+        <div class="time-row">
+          <label for="timePick">What time?</label>
+          <select id="timePick">
+            <option value="11:00">11:00 AM — late breakfast energy</option>
+            <option value="13:00">1:00 PM — lunch &amp; wander</option>
+            <option value="15:00">3:00 PM — golden hour build-up</option>
+            <option value="17:00" selected>5:00 PM — sunset o'clock</option>
+            <option value="19:00">7:00 PM — dinner &amp; night lights</option>
+          </select>
+        </div>
+
+        <p class="picked" id="pickedLabel">No day picked yet</p>
+        <button class="btn btn--yes btn--wide" id="dayNext" type="button" disabled>Confirm this day →</button>
+      </div>
+    </section>
+
+    <!-- ======================= STEP 3: PICK THE VIBE ======================= -->
+    <section class="screen" id="screen-idea" data-step="3">
+      <div class="card card--wide">
+        <button class="back-btn" data-back type="button">← Back</button>
+        <p class="eyebrow">step 2 of 3</p>
+        <h2 class="title title--sm">Okay... what are we doing?</h2>
+        <p class="subtitle">All within a few minutes of Fullerton. Pick your favorite 💕</p>
+
+        <div class="ideas" id="ideaGrid"></div>
+
+        <div class="custom-idea">
+          <label for="customIdea">Or write your own idea:</label>
+          <input type="text" id="customIdea" maxlength="120" placeholder="surprise me..." />
+        </div>
+
+        <label class="note-label" for="noteInput">Anything you want to tell me? (optional)</label>
+        <textarea id="noteInput" maxlength="300" rows="2" placeholder="e.g. pick me up? / i'm allergic to sand /  ..."></textarea>
+
+        <button class="btn btn--yes btn--wide" id="ideaNext" type="button" disabled>Lock it in →</button>
+      </div>
+    </section>
+
+    <!-- ======================= STEP 4: CONFIRM ======================= -->
+    <section class="screen" id="screen-confirm" data-step="4">
+      <div class="card">
+        <button class="back-btn" data-back type="button">← Back</button>
+        <p class="eyebrow">step 3 of 3</p>
+        <h2 class="title title--sm">Look right?</h2>
+
+        <div class="receipt">
+          <div class="receipt__row"><span>Who</span><strong>Noelle &amp; Josh</strong></div>
+          <div class="receipt__row"><span>When</span><strong id="sumWhen">—</strong></div>
+          <div class="receipt__row"><span>Time</span><strong id="sumTime">—</strong></div>
+          <div class="receipt__row"><span>What</span><strong id="sumIdea">—</strong></div>
+          <div class="receipt__row" id="sumNoteRow" hidden><span>Note</span><strong id="sumNote">—</strong></div>
+        </div>
+
+        <p class="fineprint">Hitting confirm sends this to me. You can always come back and submit a new one — I'll go off the most recent.</p>
+        <button class="btn btn--yes btn--wide" id="confirmBtn" type="button">Yes, it's a date 💘</button>
+        <p class="saving" id="savingMsg" hidden>saving...</p>
+      </div>
+    </section>
+
+    <!-- ======================= STEP 5: YAY ======================= -->
+    <section class="screen" id="screen-yay" data-step="5">
+      <div class="card card--yay">
+        <button class="back-btn" data-back type="button">← Back</button>
+        <div class="yay-emoji">🎉</div>
+        <h2 class="title">Yay, it's a date!</h2>
+        <p class="subtitle" id="yaySummary">—</p>
+
+        <div class="mini-cal" id="miniCal"></div>
+
+        <a class="btn btn--cal" id="gcalLink" href="#" target="_blank" rel="noopener">＋ Add to Google Calendar</a>
+        <button class="btn btn--ghost btn--wide" id="restartBtn" type="button">Change something ↺</button>
+        <p class="fineprint" id="savedNote">Saved 💾</p>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

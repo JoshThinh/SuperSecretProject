@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Her Answers 💌 — admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>" />
+</head>
+<body>
+  <div class="hearts" id="hearts" aria-hidden="true"></div>
+
+  <div class="admin-wrap">
+    <header class="admin-head">
+      <h1 class="title">Noelle's answers</h1>
+      <p class="subtitle">Newest on top. If she redoes it, the new one becomes the plan.</p>
+      <div class="status-pill" id="statusPill">checking…</div>
+    </header>
+
+    <div class="setup-note" id="setupNote" hidden>
+      <strong>Running on local storage.</strong> Answers save only in the browser she used.
+      To see her answer from your own laptop or phone, paste your Firebase keys into
+      <code>js/firebase-config.js</code> — instructions are in that file and in <code>README.md</code>.
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn--ghost" id="refreshBtn" type="button">↻ Refresh</button>
+      <a class="btn btn--ghost" href="index.html">← Back to the site</a>
+      <button class="btn btn--ghost" id="exportBtn" type="button">⬇ Export JSON</button>
+    </div>
+
+    <div id="list">
+      <div class="empty"><span class="empty__emoji">⏳</span>Loading…</div>
+    </div>
+  </div>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
