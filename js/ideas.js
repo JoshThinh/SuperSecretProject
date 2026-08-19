@@ -28,10 +28,10 @@ export const IDEAS = [
   },
   {
     id: 'beach',
-    emoji: '🌊',
-    name: 'Beach at Sunset',
-    desc: "Huntington in the evening. Not your favorite, I know — but there are fire pits if we get there early.",
-    location: 'Huntington Beach Pier, Huntington Beach, CA 92648',
+    emoji: '🌅',
+    name: 'Sunset at Seal Beach',
+    desc: 'About 25 minutes away. Park near the pier and watch the sunset.',
+    location: 'Seal Beach Pier, Main St, Seal Beach, CA 90740',
   },
   {
     id: 'arboretum',
