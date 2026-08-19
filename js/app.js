@@ -2,7 +2,7 @@
 //  app.js — the whole ask-out flow.
 // ============================================================
 
-import { IDEAS, NO_TAUNTS } from './ideas.js';
+import { IDEAS, OWN_IDEA_CARD, NO_TAUNTS } from './ideas.js';
 import { saveResponse, isFirebaseConfigured } from './store.js';
 import { isAvailable, earliestTimeFor, noteFor, AVAILABILITY_NOTE } from './availability.js';
 import { fmtLongDate, fmtTime, gcalLink, buildMiniCalendar } from './util.js';
@@ -232,27 +232,46 @@ renderCalendar();
 const ideaGrid = document.getElementById('ideaGrid');
 const ideaNext = document.getElementById('ideaNext');
 const customIdea = document.getElementById('customIdea');
+const customIdeaWrap = document.getElementById('customIdeaWrap');
 const noteInput = document.getElementById('noteInput');
 
-IDEAS.forEach(idea => {
+const OWN_ID = '__own__';
+
+function makeCard({ id, emoji, name, desc, extraClass = '' }) {
   const el = document.createElement('button');
   el.type = 'button';
-  el.className = 'idea';
-  el.dataset.id = idea.id;
+  el.className = `idea ${extraClass}`.trim();
+  el.dataset.id = id;
   el.innerHTML = `
-    <span class="idea__emoji">${idea.emoji}</span>
-    <div class="idea__name">${idea.name}</div>
-    <div class="idea__desc">${idea.desc}</div>`;
-  el.addEventListener('click', () => {
+    <span class="idea__emoji">${emoji}</span>
+    <div class="idea__name">${name}</div>
+    <div class="idea__desc">${desc}</div>`;
+  ideaGrid.appendChild(el);
+  return el;
+}
+
+IDEAS.forEach(idea => {
+  makeCard(idea).addEventListener('click', () => {
     state.ideaId = idea.id;
     state.ideaName = `${idea.emoji} ${idea.name}`;
     state.ideaLocation = idea.location;
     customIdea.value = '';
+    customIdeaWrap.hidden = true;
     paintIdeas();
     ideaNext.disabled = false;
   });
-  ideaGrid.appendChild(el);
 });
+
+/* "I have an idea" — opens the text box instead of setting a plan. */
+makeCard({ ...OWN_IDEA_CARD, id: OWN_ID, extraClass: 'idea--own' })
+  .addEventListener('click', () => {
+    state.ideaId = OWN_ID;
+    state.ideaLocation = 'Fullerton, CA';
+    customIdeaWrap.hidden = false;
+    paintIdeas();
+    syncOwnIdea();
+    customIdea.focus();
+  });
 
 function paintIdeas() {
   ideaGrid.querySelectorAll('.idea').forEach(el =>
@@ -260,19 +279,14 @@ function paintIdeas() {
   );
 }
 
-customIdea.addEventListener('input', () => {
+/* Her own idea only counts once she's actually typed something. */
+function syncOwnIdea() {
   const v = customIdea.value.trim();
-  if (v) {
-    state.ideaId = null;
-    state.ideaName = `✨ ${v}`;
-    state.ideaLocation = 'Fullerton, CA';
-    paintIdeas();
-    ideaNext.disabled = false;
-  } else if (!state.ideaId) {
-    state.ideaName = null;
-    ideaNext.disabled = true;
-  }
-});
+  state.ideaName = v ? `💡 ${v}` : null;
+  ideaNext.disabled = !v;
+}
+
+customIdea.addEventListener('input', syncOwnIdea);
 
 ideaNext.addEventListener('click', () => {
   if (!state.ideaName) return;
@@ -312,7 +326,7 @@ confirmBtn.addEventListener('click', async () => {
       date: state.date,
       time: state.time,
       idea: state.ideaName,
-      ideaId: state.ideaId,
+      ideaId: state.ideaId === OWN_ID ? null : state.ideaId,
       location: state.ideaLocation,
       note: state.note,
       dodges,
@@ -348,7 +362,7 @@ function renderYay(saved) {
   });
 
   document.getElementById('savedNote').textContent = saved
-    ? (isFirebaseConfigured
+    ? (saved.via === 'firestore'
         ? 'Saved 💾 — he can see it now.'
         : 'Saved 💾 on this device.')
     : "Couldn't save that one — try confirming again?";

@@ -345,6 +345,8 @@ body {
   box-shadow: 0 10px 22px rgba(201,24,74,.22);
 }
 .idea.is-selected::after { content: "✓"; float: right; color: var(--cherry); font-weight: 700; }
+.idea--own { border-style: dashed; }
+.idea--own.is-selected { border-style: solid; }
 .idea__emoji { font-size: 26px; display: block; margin-bottom: 6px; }
 .idea__name { font-weight: 600; font-size: 15.5px; margin-bottom: 3px; color: var(--cherry); }
 .idea__desc { font-size: 13px; line-height: 1.45; color: var(--ink-soft); }

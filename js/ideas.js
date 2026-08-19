@@ -47,14 +47,15 @@ export const IDEAS = [
     desc: 'Round1 in Brea — arcade games and air hockey, boba after.',
     location: 'Round1 Brea, 1065 Brea Mall, Brea, CA 92821',
   },
-  {
-    id: 'you-pick',
-    emoji: '🎁',
-    name: 'Leave it to me',
-    desc: "Don't feel like deciding? I'll plan it. You just show up.",
-    location: 'Fullerton, CA',
-  },
 ];
+
+// The last card in the grid isn't a fixed plan — picking it opens a text box
+// so she can say what she'd rather do.
+export const OWN_IDEA_CARD = {
+  emoji: '💡',
+  name: 'I have an idea',
+  desc: "Something else you'd rather do? Pick this and tell me.",
+};
 
 // Escalating messages for the No button, in order.
 export const NO_TAUNTS = [

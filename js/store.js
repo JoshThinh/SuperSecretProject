@@ -24,6 +24,8 @@ async function getFirebase() {
   if (fb) return fb;
   if (!fbPromise) {
     fbPromise = (async () => {
+      // If the SDK can't be reached (offline, blocked network, ad blocker),
+      // clear the cached promise so a later attempt can retry.
       const base = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}`;
       const [{ initializeApp }, fs] = await Promise.all([
         import(`${base}/firebase-app.js`),
@@ -33,7 +35,7 @@ async function getFirebase() {
       const db = fs.getFirestore(app);
       fb = { db, fs };
       return fb;
-    })();
+    })().catch(err => { fbPromise = null; throw err; });
   }
   return fbPromise;
 }
@@ -57,7 +59,7 @@ export async function saveResponse(data) {
         createdAt: fs.serverTimestamp(),
         createdAtISO: record.createdAt,
       });
-      return { id: ref.id, ...record };
+      return { id: ref.id, ...record, via: 'firestore' };
     } catch (err) {
       console.error('[store] Firestore write failed, falling back to localStorage:', err);
     }
@@ -67,7 +69,7 @@ export async function saveResponse(data) {
   const saved = { id: `local_${Date.now()}`, ...record };
   all.push(saved);
   localStorage.setItem(LS_KEY, JSON.stringify(all));
-  return saved;
+  return { ...saved, via: 'local' };
 }
 
 /* ------------------------------------------------------------
@@ -84,6 +86,10 @@ export async function loadResponses() {
       console.error('[store] Firestore read failed, falling back to localStorage:', err);
     }
   }
+  return sortedLocal();
+}
+
+function sortedLocal() {
   return readLocal().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 }
 
@@ -95,18 +101,24 @@ export function subscribeResponses(callback) {
   if (isFirebaseConfigured) {
     let unsub = () => {};
     let cancelled = false;
-    getFirebase().then(({ db, fs }) => {
-      if (cancelled) return;
-      const q = fs.query(fs.collection(db, COLLECTION), fs.orderBy('createdAtISO', 'desc'));
-      unsub = fs.onSnapshot(
-        q,
-        snap => callback(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
-        err => {
-          console.error('[store] snapshot error:', err);
-          loadResponses().then(callback);
-        }
-      );
-    });
+    getFirebase()
+      .then(({ db, fs }) => {
+        if (cancelled) return;
+        const q = fs.query(fs.collection(db, COLLECTION), fs.orderBy('createdAtISO', 'desc'));
+        unsub = fs.onSnapshot(
+          q,
+          snap => callback(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+          err => {
+            console.error('[store] snapshot error:', err);
+            readLocal().length ? callback(sortedLocal()) : callback([]);
+          }
+        );
+      })
+      .catch(err => {
+        // SDK never loaded — don't leave the page stuck on "Loading…"
+        console.error('[store] Firebase unavailable, showing local data instead:', err);
+        if (!cancelled) callback(sortedLocal());
+      });
     return () => { cancelled = true; unsub(); };
   }
 
