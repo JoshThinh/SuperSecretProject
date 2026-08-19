@@ -143,6 +143,7 @@ function dodge() {
   noBtn.style.left = `${pos.x}px`;
   noBtn.style.top = `${pos.y}px`;
   noBtn.style.transform = `rotate(${tilt.toFixed(1)}deg)`;
+  enforceAfterSettle();
 
   askSubtitle.textContent = NO_TAUNTS[Math.min(dodges - 1, NO_TAUNTS.length - 1)];
 
@@ -159,17 +160,75 @@ noBtn.addEventListener('click', e => {
   dodge();
 });
 
-/* Rotating the phone or resizing the window can strand it off-screen. */
-function keepOnScreen() {
+/* ------------------------------------------------------------------
+   Safety net.
+
+   Everything above works in CSS pixels and assumes the button's
+   coordinates land on screen 1:1. Belt and braces: once it has settled,
+   measure where it ACTUALLY got painted and nudge it back if any edge is
+   outside. This catches anything the arithmetic can't know about — an
+   ancestor scale, a browser quirk, a stylesheet change later on.
+   ------------------------------------------------------------------ */
+function enforceOnScreen(pass = 0) {
   if (!noBtn.classList.contains('is-loose')) return;
-  // Read back the layout position we set, not the painted (rotated) rect.
-  const pos = clampToViewport(parseFloat(noBtn.style.left) || 0, parseFloat(noBtn.style.top) || 0);
-  noBtn.style.left = `${pos.x}px`;
-  noBtn.style.top = `${pos.y}px`;
+
+  // Measure without the tilt so the numbers are the plain box...
+  const prevTransform = noBtn.style.transform;
+  noBtn.style.transform = 'none';
+  const flat = noBtn.getBoundingClientRect();
+  noBtn.style.transform = prevTransform;
+
+  // ...then add the tilt's overhang back on, in painted units.
+  const over = overhang(flat.width, flat.height, tilt);
+  const left = flat.left - over.x, right = flat.right + over.x;
+  const top = flat.top - over.y, bottom = flat.bottom + over.y;
+  const paintedW = right - left, paintedH = bottom - top;
+
+  const { w: vw, h: vh } = viewport();
+  let dx = 0, dy = 0;
+
+  if (paintedW <= vw - PAD * 2) {
+    if (left < PAD) dx = PAD - left;
+    else if (right > vw - PAD) dx = (vw - PAD) - right;
+  } else {
+    dx = (vw - paintedW) / 2 - left;   // too wide to fit: centre it
+  }
+  if (paintedH <= vh - PAD * 2) {
+    if (top < PAD) dy = PAD - top;
+    else if (bottom > vh - PAD) dy = (vh - PAD) - bottom;
+  } else {
+    dy = (vh - paintedH) / 2 - top;
+  }
+
+  if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+
+  // Painted pixels may not equal CSS pixels if something is scaling us.
+  const scale = (flat.width / (noBtn.offsetWidth || 1)) || 1;
+
+  // Snap rather than slide, so the correction is invisible and can be
+  // re-measured immediately.
+  const prevTransition = noBtn.style.transition;
+  noBtn.style.transition = 'none';
+  noBtn.style.left = `${(parseFloat(noBtn.style.left) || 0) + dx / scale}px`;
+  noBtn.style.top = `${(parseFloat(noBtn.style.top) || 0) + dy / scale}px`;
+  void noBtn.offsetWidth;
+  noBtn.style.transition = prevTransition;
+
+  // One nudge may not be enough if the scale guess was off — converge.
+  if (pass < 4) requestAnimationFrame(() => enforceOnScreen(pass + 1));
 }
-window.addEventListener('resize', keepOnScreen);
-window.addEventListener('orientationchange', keepOnScreen);
-window.visualViewport?.addEventListener('resize', keepOnScreen);
+
+/* Run it once the move has finished animating. */
+let settleTimer;
+function enforceAfterSettle() {
+  clearTimeout(settleTimer);
+  settleTimer = setTimeout(() => enforceOnScreen(), 260);
+}
+
+window.addEventListener('resize', () => { enforceOnScreen(); enforceAfterSettle(); });
+window.addEventListener('scroll', enforceAfterSettle, { passive: true });
+window.addEventListener('orientationchange', enforceAfterSettle);
+window.visualViewport?.addEventListener('resize', enforceAfterSettle);
 
 yesBtn.addEventListener('click', () => {
   burst(26);
