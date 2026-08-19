@@ -19,12 +19,12 @@
 // ============================================================
 
 export const firebaseConfig = {
-  apiKey:            "PASTE_API_KEY",
-  authDomain:        "PASTE_PROJECT_ID.firebaseapp.com",
-  projectId:         "PASTE_PROJECT_ID",
-  storageBucket:     "PASTE_PROJECT_ID.appspot.com",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId:             "PASTE_APP_ID",
+  apiKey:            "AIzaSyAMG6kCh_1Y5Nt2H-I1eKUzGFMlNsGWgEw",
+  authDomain:        "hehehenoe.firebaseapp.com",
+  projectId:         "hehehenoe",
+  storageBucket:     "hehehenoe.firebasestorage.app",
+  messagingSenderId: "551977919429",
+  appId:             "1:551977919429:web:faf2c35efd7db5545c21ac",
 };
 
 // Name of the Firestore collection that holds her answers.

@@ -43,17 +43,24 @@ Your dashboard is at `/admin.html`.
 Without this step everything works, but her answer is saved only in the browser she
 used. With it, she can fill it out anywhere and you see it instantly.
 
-1. <https://console.firebase.google.com> → **Add project** (skip Analytics).
-2. On the project home, click the **`</>`** web icon → give it any nickname → **Register app**.
-3. Copy the `firebaseConfig` values into `js/firebase-config.js` (replace every `PASTE_…`).
-4. Left sidebar → **Build → Firestore Database → Create database → Start in test mode**.
-5. Reload `admin.html`. The pill at the top should read **Live · Firestore**.
+1. <https://console.firebase.google.com> → **Create a project**. Name it anything. Turn
+   **Google Analytics off** — you don't need it and it adds two more screens.
+2. On the project overview page, click the **`</>`** (web) icon under "Get started by adding
+   Firebase to your app". Nickname it anything. **Do not** check "Firebase Hosting".
+   → **Register app**.
+3. It shows you a `firebaseConfig` object. Copy those six values into `js/firebase-config.js`,
+   replacing every `PASTE_…`. Keep the quotes. (Lost the screen? Gear icon → **Project settings**
+   → scroll to **Your apps**.)
+4. Left sidebar → **Databases & Storage → Firestore** → **Create database**. Pick a location
+   (`nam5` or `us-west1` is fine — it can't be changed later) → **Start in test mode** → **Create**.
+5. Go to the **Rules** tab and paste the rules from the next section, then **Publish**. Test mode
+   stops working after 30 days, so don't skip this.
+6. Reload `admin.html`. The pill at the top should read **Live · Firestore**.
 
 ### Firestore rules
 
-Test mode expires after 30 days and lets anyone read. Paste this in
-**Firestore → Rules** instead — she can submit, but nobody can read the answers
-from the web:
+Test mode expires after 30 days and lets anyone write anything. Replace it with this —
+it locks the database down to exactly what this app does, with no expiry date:
 
 ```
 rules_version = '2';
@@ -61,15 +68,21 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /dateResponses/{doc} {
       allow create: if true;
-      allow read, update, delete: if false;
+      allow read: if true;
+      allow update, delete: if false;
     }
   }
 }
 ```
 
-With that rule, read her answers in the **Firebase console → Firestore → `dateResponses`**.
-If you'd rather keep using `admin.html`, leave `allow read: if true;` — the odds of a
-stranger finding your project are basically zero, but it *is* technically public.
+`create` + `read` are what `admin.html` needs to work. `update`/`delete` are off, so nobody
+can tamper with or wipe an answer that's already in — including the Delete button on your
+dashboard, which will silently fail. If you want that button working, flip `delete` to `true`.
+
+Note that `read: if true` means the answers are technically readable by anyone who knows your
+project ID. For a date invite that's fine. If it bugs you, set `read: if false` and view them in
+**Firebase console → Firestore → `dateResponses`** instead — the console reads as you, the owner,
+so it works regardless of the rules.
 
 The API keys in `firebase-config.js` are **not** secrets — Firebase web keys are
 designed to ship in the browser. The rules are what protect the data.
